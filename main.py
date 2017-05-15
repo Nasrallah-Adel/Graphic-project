@@ -9,10 +9,11 @@ from panda3d.core import CollisionTraverser,CollisionNode,CollisionSphere
 from pandac.PandaModules import Texture, TextureStage, CardMaker
 from direct.showbase.DirectObject import DirectObject
 
-
+mySound1 = base.loader.loadSfx("happ.ogg")
 
 class world (DirectObject):
     def __init__(self):
+        mySound1.play()
         base.setBackgroundColor(0,0,0)
         base.camera.setPos(0,15,1)
         base.camera.setHpr(0,180,180)
@@ -367,7 +368,7 @@ class world (DirectObject):
             "w": False
             , "s": False
             , "a": False,
-            "d": False
+              "d": False
             , "o": False
             , "c": False
             , "r": False
@@ -396,13 +397,49 @@ class world (DirectObject):
         self.an=10
         self.angledegrees =0
         base.camera.setH(1)
-############camera control###################
 
+        self.cameras = []
+        self.activeCam = 0
+        self.cameras = [base.cam, base.makeCamera(base.win)]
+        self.cameras[1].node().getDisplayRegion(0).setActive(0)
+        self.activeCam = 0
+        self.cameras[0].setPos(0, -30, 6)
+        self.cameras[1].setPos(30, 100, 20)
+        self.cameras[1].lookAt(self.ob7)
+
+        # second camera
+        self.cameras1 = []
+        self.activeCam1 = 0
+        self.cameras1 = [base.cam, base.makeCamera(base.win)]
+        self.cameras1[1].node().getDisplayRegion(0).setActive(0)
+        self.activeCam1 = 0
+        self.cameras1[0].setPos(0, -30, 6)
+        self.cameras1[1].setPos(-80, 100, 20)
+        self.cameras1[1].lookAt(self.ob2)
+############camera control###################
+    def toggleCam(self, task):
+        if (self.keyMap["r"] == True):
+            self.cameras[self.activeCam].node().getDisplayRegion(0).setActive(0)
+            self.activeCam = not self.activeCam
+            self.cameras[self.activeCam].node().getDisplayRegion(0).setActive(1)
+
+        return task.again
+
+    def toggleCam1(self, task):
+        if (self.keyMap["t"] == True):
+            self.cameras1[self.activeCam1].node().getDisplayRegion(0).setActive(0)
+            self.activeCam1 = not self.activeCam1
+            self.cameras1[self.activeCam1].node().getDisplayRegion(0).setActive(1)
+
+        return task.again
     def control(self, task):
 
         dt = globalClock.getDt()
         if (self.keyMap["o"] == True):
             self.a = True
+            mySound1.stop()
+            mySound = base.loader.loadSfx("horr.ogg")
+            mySound.play()
             self.ob6 = loader.loadModel("model/Pterodactyl/Pterodactyl.egg")
             self.ob6.reparentTo(render)
             self.ob6.setScale(3, 3, 3)
@@ -601,6 +638,7 @@ class world (DirectObject):
         screenCard.setTexture(screenStage, screenTexture)
 
 w=world()
-
+taskMgr.add(w.toggleCam, "toggle camera")
+taskMgr.add(w.toggleCam1, "toggle camera1")
 #taskMgr.add(w.SpinCameraTask, "SpinCameraTask")
 run()
